@@ -72,3 +72,100 @@ body {
   color: #f1f5f9;
   font-family: "DM Sans", "Segoe UI", sans-serif;
 }
+
+/* ---- Responsive: Medecin View ---- */
+
+.medecin-layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.medecin-sidebar {
+  display: block;
+}
+
+.medecin-dossier {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.medecin-back-btn {
+  display: none;
+}
+
+.medecin-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+@media (max-width: 768px) {
+  .medecin-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .medecin-sidebar.hidden-mobile {
+    display: none;
+  }
+
+  .medecin-dossier.hidden-mobile {
+    display: none;
+  }
+
+  .medecin-back-btn {
+    display: flex;
+  }
+
+  .medecin-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+}
+
+/* ---- Responsive: Patient header ---- */
+
+.patient-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .patient-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .patient-header .patient-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .patient-header .patient-actions button {
+    flex: 1;
+  }
+}
+
+/* ---- Main layout ---- */
+
+.main-padded {
+  padding: 28px 32px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .main-padded {
+    padding: 12px 10px;
+  }
+
+  .topbar-rpps {
+    display: none !important;
+  }
+}

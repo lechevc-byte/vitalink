@@ -74,7 +74,7 @@ export default function AuthLayout({
   return (
     <>
       <Topbar profile={profile} />
-      <main style={fullWidth ? {} : { padding: "28px 32px", maxWidth: 1320, margin: "0 auto" }}>
+      <main className={fullWidth ? "" : "main-padded"}>
         {children(profile)}
       </main>
     </>

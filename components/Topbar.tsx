@@ -41,11 +41,11 @@ export default function Topbar({ profile }: { profile: Profile }) {
         background: "rgba(8,13,26,0.95)",
         backdropFilter: "blur(16px)",
         borderBottom: `1px solid ${C.border}`,
-        height: 60,
+        height: 54,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 28px",
+        padding: "0 14px",
         position: "sticky",
         top: 0,
         zIndex: 100,
@@ -92,6 +92,7 @@ export default function Topbar({ profile }: { profile: Profile }) {
         </div>
         {profile.numero_rpps && (
           <span
+            className="topbar-rpps"
             style={{
               fontSize: 11,
               color: C.textMuted,

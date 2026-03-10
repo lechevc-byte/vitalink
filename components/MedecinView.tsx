@@ -6,6 +6,7 @@ import { age, fmtDate, exportDMP } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase-client";
 import Icon from "./Icon";
 import ConsultationModal from "./ConsultationModal";
+import TodayConsultation from "./TodayConsultation";
 
 interface Profile {
   id: string;
@@ -60,6 +61,7 @@ export default function MedecinView({ profile }: { profile: Profile }) {
   const [activeConsult, setActiveConsult] = useState<Consultation | null>(null);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("timeline");
+  const [showPatientList, setShowPatientList] = useState(true);
 
   useEffect(() => {
     loadPatients();
@@ -108,12 +110,8 @@ export default function MedecinView({ profile }: { profile: Profile }) {
   const selectPatient = (p: Patient) => {
     setSelected(p);
     setTab("timeline");
+    setShowPatientList(false); // on mobile, switch to dossier view
     loadPatientDetails(p.id);
-  };
-
-  const updateConsult = (updated: Consultation) => {
-    setConsultations((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
-    setActiveConsult(updated);
   };
 
   const filtered = patients.filter(
@@ -125,9 +123,9 @@ export default function MedecinView({ profile }: { profile: Profile }) {
   const scoreColor = (sc: number) => (sc >= 90 ? C.green : sc >= 70 ? C.amber : C.red);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "290px 1fr", gap: 20, alignItems: "start" }}>
+    <div className="medecin-layout">
       {/* Patient list */}
-      <div style={s.card}>
+      <div className={`medecin-sidebar${!showPatientList && selected ? " hidden-mobile" : ""}`} style={s.card}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <span style={s.h2}>Patients</span>
           <span style={{ ...tag("blue"), fontSize: 12 }}>{patients.length}</span>
@@ -202,24 +200,39 @@ export default function MedecinView({ profile }: { profile: Profile }) {
 
       {/* Dossier */}
       {selected && (
-        <div style={s.col}>
+        <div className={`medecin-dossier${showPatientList ? " hidden-mobile" : ""}`}>
+          {/* Back button (mobile only) */}
+          <button
+            className="medecin-back-btn"
+            onClick={() => setShowPatientList(true)}
+            style={{
+              ...btn("ghost"),
+              padding: "8px 12px",
+              fontSize: 13,
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span style={{ fontSize: 16 }}>&larr;</span> Voltar à lista
+          </button>
+
           {/* Header patient */}
-          <div style={{ ...s.card, display: "flex", gap: 16, alignItems: "flex-start" }}>
+          <div className="patient-header" style={s.card}>
             <div style={avatar(58)}>
               {selected.prenom[0]}
               {selected.nom[0]}
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
-                <h2 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: C.text, margin: 0 }}>
                   {selected.prenom} {selected.nom}
                 </h2>
                 <span style={tag("blue")}>{selected.groupe_sanguin}</span>
                 <span style={{ ...tag("green"), borderRadius: 5 }}>
-                  Score continuité : {selected.score_continuite}%
+                  {selected.score_continuite}%
                 </span>
               </div>
-              <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 10 }}>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
                 <span style={s.muted}>
                   {age(selected.date_naissance)} ans · {fmtDate(selected.date_naissance)}
                 </span>
@@ -237,6 +250,7 @@ export default function MedecinView({ profile }: { profile: Profile }) {
                         background: a.type === "warning" ? C.amberDim : C.blueDim,
                         padding: "6px 10px",
                         borderRadius: 7,
+                        flexWrap: "wrap",
                       }}
                     >
                       <Icon name="alert" size={13} />
@@ -246,7 +260,7 @@ export default function MedecinView({ profile }: { profile: Profile }) {
                 </div>
               )}
             </div>
-            <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <div className="patient-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
               <button
                 onClick={() =>
                   exportDMP({
@@ -262,11 +276,19 @@ export default function MedecinView({ profile }: { profile: Profile }) {
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* TODAY CONSULTATION — main CTA */}
+          <TodayConsultation
+            patientId={selected.id}
+            patientNom={`${selected.prenom} ${selected.nom}`}
+            medecinId={profile.id}
+            rpps={profile.numero_rpps}
+            onConsultationSaved={() => loadPatientDetails(selected.id)}
+          />
+
+          {/* Tabs — historique */}
           <div
+            className="medecin-tabs"
             style={{
-              display: "flex",
-              gap: 4,
               background: C.surface,
               border: `1px solid ${C.border}`,
               borderRadius: 10,
@@ -506,15 +528,10 @@ export default function MedecinView({ profile }: { profile: Profile }) {
         </div>
       )}
 
-      {activeConsult && selected && (
+      {activeConsult && (
         <ConsultationModal
           consult={activeConsult}
-          patientNom={`${selected.prenom} ${selected.nom}`}
-          isMedecin={true}
-          rpps={profile.numero_rpps}
-          patientId={selected.id}
           onClose={() => setActiveConsult(null)}
-          onUpdate={updateConsult}
         />
       )}
     </div>
