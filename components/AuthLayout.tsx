@@ -16,9 +16,11 @@ interface Profile {
 export default function AuthLayout({
   children,
   requiredRole,
+  fullWidth = false,
 }: {
   children: (profile: Profile) => React.ReactNode;
   requiredRole: string;
+  fullWidth?: boolean;
 }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,7 +74,7 @@ export default function AuthLayout({
   return (
     <>
       <Topbar profile={profile} />
-      <main style={{ padding: "28px 32px", maxWidth: 1320, margin: "0 auto" }}>
+      <main style={fullWidth ? {} : { padding: "28px 32px", maxWidth: 1320, margin: "0 auto" }}>
         {children(profile)}
       </main>
     </>
