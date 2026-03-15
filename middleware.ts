@@ -31,8 +31,8 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Allow login page and API routes
-  if (pathname === "/login" || pathname.startsWith("/api/")) {
+  // Allow public pages: home, login, API routes
+  if (pathname === "/" || pathname === "/login" || pathname.startsWith("/api/")) {
     return supabaseResponse;
   }
 
@@ -43,25 +43,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If authenticated and on root, redirect based on role
-  if (pathname === "/") {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    const roleRoutes: Record<string, string> = {
-      medecin: "/medecin",
-      patient: "/patient",
-      operateur_etat: "/etat",
-      mutuelle: "/mutuelle",
-    };
-
-    const url = request.nextUrl.clone();
-    url.pathname = roleRoutes[profile?.role] || "/login";
-    return NextResponse.redirect(url);
-  }
+  // If authenticated and on root, let them see the landing page
+  // (the landing page has a "Demo" button that goes to /login)
 
   return supabaseResponse;
 }
